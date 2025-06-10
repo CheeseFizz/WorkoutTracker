@@ -21,6 +21,8 @@ Being built in Python for simplicity; not because it's the best choice for this 
 - [ ] PyInstaller build package? 
 - [ ] Progression suggestions?
 - [ ] 4-8 week program builder?
+- [ ] Cleaner source / test layout 
+  - might not be a stretch, depending on how annoyed I get at having all of my code in the same directory...
 
 ## Build Instructions
 TBD
