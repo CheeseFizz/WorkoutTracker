@@ -47,10 +47,14 @@ class AppFrame(wx.Frame):
         # When using a stock ID we don't need to specify the menu item's
         # label
         exitItem = fileMenu.Append(wx.ID_EXIT)
+        preferencesItem = fileMenu.Append(wx.ID_PREFERENCES)
+
 
         # Now a help menu for the about item
         helpMenu = wx.Menu()
         aboutItem = helpMenu.Append(wx.ID_ABOUT)
+        
+
 
         # Make the menu bar and add the two menus to it. The '&' defines
         # that the next letter is the "mnemonic" for the menu item. On the
@@ -69,6 +73,7 @@ class AppFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnHello, helloItem)
         self.Bind(wx.EVT_MENU, self.OnExit,  exitItem)
         self.Bind(wx.EVT_MENU, self.OnAbout, aboutItem)
+        self.Bind(wx.EVT_MENU, self.OnPreferences, preferencesItem)
 
 
     def OnExit(self, event):
@@ -86,3 +91,22 @@ class AppFrame(wx.Frame):
         wx.MessageBox("This is a wxPython Hello World sample",
                       "About Hello World 2",
                       wx.OK|wx.ICON_INFORMATION)
+                    
+    def OnPreferences(self, event):
+        prefmenu = PreferencesDialog(self, "Preferences")
+        prefmenu.Show()
+        # wx.MessageBox("Preferences Menu",
+        #               "WIP",
+        #               wx.OK|wx.ICON_INFORMATION)
+
+
+
+class PreferencesDialog(wx.Dialog):
+
+    def __init__(self, parent, title):
+        super(PreferencesDialog, self).__init__(parent, title=title)
+        panel = wx.Panel(self)
+        sizer = wx.GridSizer(3, 3, 5, 5)
+        panel.SetSizer(sizer)
+        self.btn = wx.Button(panel, wx.ID_OK, label = "ok")
+        sizer.Add(self.btn, 0, wx.ALIGN_CENTER)
