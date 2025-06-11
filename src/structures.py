@@ -1,12 +1,20 @@
 # for classes related to data objects
 
-from os import get_terminal_size
+import os
+import json
 
 class Exercise():
 
     def __init__(self, name, equipment):
         self.name = name
         self.equipment = equipment 
+        self.data = self._load()
+        rootdir = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
+        datadir = os.path.join(rootdir, "data")
+        filename = f"e_{self.name.replace(" ", "")}_{self.equipment.replace(" ","")}.json"
+        if not os.path.exists(datadir):
+            os.mkdri(datadir)
+        self.filepath = os.path.join(datadir, filename)
 
     def __repr__(self):
         return f"{self.equipment} {self.name}"
@@ -14,14 +22,46 @@ class Exercise():
     def __eq__(self, other):
         return (self.name == other.name and self.equipment == other.equipment)
 
+    def _save(self):
+        with open(self.filepath, "w") as f:
+            json.dump({
+                "name": self.name,
+                "equipment": self.equipment,
+                "data": self.data
+            },f, indent=4)
+
+    def _load(self):
+        if os.path.exists(self.filepath):
+            with open(self.filepath, 'r') as f:
+                jsonobj = json.load(f)
+            if (self.name != jsonobj['name']) or (self.equipment != jsonobj['equipment']):
+                raise ValueError(f"Invalid data loaded for {self.__repr__()} from file: {self.filepath}")
+            self.data = jsonobj['data']
+        else:
+            self.data = {
+                "weightmax": dict(),
+                "repmax": dict(),
+                "history": dict()
+            }
+
+    def _getMax(self):
+        pass
+
+    def _setMax(self, target, reps, weight, units):
+        if target.lower() == "weight":
+            self.data["weightmax"][f"{reps}reps"] = weight
+        if target.lower() == "reps":
+            self.data["reps"][f"{weight}{units}"] = reps
+
 class ExerciseSet():
 
-    def __init__(self, exercise, reps, weight, set_index, units="lbs"):
+    def __init__(self, exercise, reps, weight, set_index, units="lbs", target="reps"):
         self.exercise = exercise
         self.reps = reps
         self.weight = weight
         self.units = units
         self.set_index = set_index
+        self.target = target
 
     def __repr__(self):
         return f"[ExerciseSet] {self.exercise}: {self.reps} @ {self.weight}{self.units}"
@@ -106,7 +146,7 @@ class WorkoutPlan():
         return f"[WorkoutPlan] {self.name}: {len(self.exercise_blocks)} exercises; {len(tags)} tags"
 
     def _print(self):
-        hline = "-"*get_terminal_size()[0]
+        hline = "-"*os.get_terminal_size()[0]
         rstring = f"{self.name.title()}`n`n{self.description}`n {hline}`n`n"
         for block in self.exercise_blocks:
             rstring += f"{block._print}`n`n"

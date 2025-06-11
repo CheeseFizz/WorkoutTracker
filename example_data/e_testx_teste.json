@@ -1,0 +1,31 @@
+{
+    "name" : "testx",
+    "equipment" : "teste",
+    "data" : {
+        "weightmax" : {
+            "1reps": 405,
+            "2reps": 385,
+            "4reps": 365
+        },
+        "repmax" : {
+            "225lbs": 10,
+            "365lbs": 5,
+            "405lbs": 1
+        },
+        "history" : {
+            "20250604" : {
+                "set1" : {"reps": 5, "weight": 360, "units": "lbs"},
+                "set2" : {"reps": 5, "weight": 360, "units": "lbs"},
+                "set3" : {"reps": 5, "weight": 360, "units": "lbs"}
+            },
+            "20250611" : {
+                "set1" : {"reps": 5, "weight": 365, "units": "lbs"},
+                "set2" : {"reps": 5, "weight": 365, "units": "lbs"},
+                "set3" : {"reps": 5, "weight": 365, "units": "lbs"}
+            }
+        }
+            
+        
+    }
+    
+}
