@@ -131,6 +131,7 @@ class TestWorkoutPlan(unittest.TestCase):
         expected = {
             "name": "test plan",
             "tags": {"test", "tag", "plan"},
+            "description": "",
             "exercise_blocks": [
                 block1._serialize(),
                 block2._serialize()
@@ -141,5 +142,70 @@ class TestWorkoutPlan(unittest.TestCase):
         self.maxDiff = None
         self.assertEqual(expected, actual)
     
+    def testPrintExerciseSet(self):
+        ex1 = Exercise("Test", "Computer")
+        s1 = ExerciseSet(ex1, 12, 40, 1)
 
-    
+        actual = s1._print()
+
+        expected = f"{s1.reps} @ {s1.weight}{s1.units}"
+
+        self.assertEqual(expected, actual)
+
+    def testPrintExerciseBlock(self):
+        ex1 = Exercise("Test", "Computer")
+        block1 = ExerciseBlock(ex1, "A test block", set(["test","tag", "block"]))
+        block1.addSet(10, 25)
+        block1.addSet(10,35)
+
+        actual = block1._print()
+
+        expected = f"{block1.exercise.__repr__().title()}:\nTags: {", ".join(block1.tags)}\n{block1.sets[0]._print()}\n{block1.sets[1]._print()}\n\n"
+
+        self.maxDiff = None
+        self.assertEqual(expected, actual)
+
+    def testPrintWorkoutPlan(self):
+        plan = WorkoutPlan("test plan", set(["test", "tag", "plan"]))
+        ex1 = Exercise("Test", "Computer")
+        block1 = ExerciseBlock(ex1, "A test block", set(["test","tag", "block"]))
+        block1.addSet(10, 25)
+        block1.addSet(10,35)
+
+        ex2 = Exercise("Test2", "Computer")
+        block2 = ExerciseBlock(ex2, "Second test block", set(["test", "block2"]))
+        block2.addSet(12, 20)
+        block2.addSet(12, 25)
+        block2.addSet(10, 30)
+
+        plan.addExerciseBlock(block1)
+        plan.addExerciseBlock(block2)
+
+        actual = plan._print()
+
+        # hline = "-"*os.get_terminal_size()[0]   doesn't work nice; try again later
+        expected = f"{plan.name.title()}\n\n{plan.description}\n\n{block1._print()}{block2._print()}"
+        
+        self.maxDiff = None
+        self.assertEqual(expected, actual)
+
+    def testExportTextWorkoutPlan(self):
+        plan = WorkoutPlan("test plan", set(["test", "tag", "plan"]))
+        ex1 = Exercise("Test", "Computer")
+        block1 = ExerciseBlock(ex1, "A test block", set(["test","tag", "block"]))
+        block1.addSet(10, 25)
+        block1.addSet(10,35)
+
+        ex2 = Exercise("Test2", "Computer")
+        block2 = ExerciseBlock(ex2, "Second test block", set(["test", "block2"]))
+        block2.addSet(12, 20)
+        block2.addSet(12, 25)
+        block2.addSet(10, 30)
+
+        plan.addExerciseBlock(block1)
+        plan.addExerciseBlock(block2)
+
+        plan.exportText("/home/cheese/BootDev/projects/WorkoutTracker/tests/testplan.txt")
+
+        self.assertTrue(os.path.exists("/home/cheese/BootDev/projects/WorkoutTracker/tests/testplan.txt"))
+        self.assertRaises(FileNotFoundError, plan.exportText, "/home/cheese/BootDev/projects/WorkoutTracker/notreal/testplan.txt")

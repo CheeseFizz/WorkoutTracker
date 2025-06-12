@@ -6,9 +6,11 @@ Being built in Python for simplicity; not because it's the best choice for this 
 ## Roadmap
 #### Primary:
 - [ ] wxPython application
-- [ ] User definable exercises
-- [ ] User definable workout plan
-- [ ] Convert plan to printable format
+- [x] User definable exercises
+- [x] User definable workout plan
+- [x] Convert plan to printable format
+  - [x] Text representation of a plan
+  - [x] Save text representation to file
 - [ ] Record actual workout results (i.e. exercise A, set x, y reps at z weight)
 - [ ] Record best weight and rep achievements
 - [ ] Recall most recent actuals when planning new workout with same exercise
@@ -19,6 +21,7 @@ Being built in Python for simplicity; not because it's the best choice for this 
   - [ ] Delete all artifacts belonging to the program
 
 #### Stretch:
+- [ ] Prettier, printable export of workout plan
 - [ ] PyInstaller build package? 
 - [ ] Progression suggestions?
 - [ ] 4-8 week program builder?

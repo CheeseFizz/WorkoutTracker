@@ -153,10 +153,10 @@ class ExerciseBlock():
         return False
 
     def _print(self):
-        rstring = f"{self.exercise.title()}:`nTags: {", ",join(self.tags)}"
-        for s in sets:
-            rstring += f"{s._print()}'n"
-        rstring += "`n"
+        rstring = f"{self.exercise.__repr__().title()}:\nTags: {", ".join(self.tags)}\n"
+        for s in self.sets:
+            rstring += f"{s._print()}\n"
+        rstring += "\n"
 
         return rstring
 
@@ -194,9 +194,10 @@ class ExerciseBlock():
 
 class WorkoutPlan():
 
-    def __init__(self, name, tags):
+    def __init__(self, name, tags, description=""):
         self.name = name
         self.tags = tags
+        self.description = description
         self.exercise_blocks = []
 
         rootdir = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
@@ -210,10 +211,10 @@ class WorkoutPlan():
         return f"[WorkoutPlan] {self.name}: {len(self.exercise_blocks)} exercises; {len(tags)} tags"
 
     def _print(self):
-        hline = "-"*os.get_terminal_size()[0]
-        rstring = f"{self.name.title()}`n`n{self.description}`n {hline}`n`n"
+        # hline = "-"*os.get_terminal_size()[0]   doesn't work nice; try again later
+        rstring = f"{self.name.title()}\n\n{self.description}\n\n"
         for block in self.exercise_blocks:
-            rstring += f"{block._print}`n`n"
+            rstring += f"{block._print()}"
 
         return rstring
         
@@ -230,6 +231,9 @@ class WorkoutPlan():
 
     def exportText(self, outfile):
         # some file safety stuff
+        parentdir = os.path.join(os.path.dirname(os.path.realpath(outfile)), os.pardir)
+        if not os.path.exists(parentdir):
+            raise FileNotFoundError(f"directory does not exist: {parentdir}")
 
         # build string
         extext = self._print()
@@ -241,6 +245,7 @@ class WorkoutPlan():
     def _serialize(self):
         serialdict = {
             "name": self.name,
+            "description": self.description,
             "tags": self.tags,
             "exercise_blocks": []
         }
