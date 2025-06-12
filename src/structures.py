@@ -44,8 +44,17 @@ class Exercise():
                 "history": dict()
             }
 
-    def _getMax(self):
-        pass
+    def _getMax(self, target, reps, weight, units):
+        if target.lower() == "weight":
+            try:
+                return self.data["weightmax"][f"{reps}reps"]
+            except KeyError:
+                return None
+        if target.lower() == "reps":
+            try:
+                return self.data["reps"][f"{weight}{units}"]
+            except KeyError:
+                return None
 
     def _setMax(self, target, reps, weight, units):
         if target.lower() == "weight":
