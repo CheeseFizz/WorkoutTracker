@@ -1,5 +1,6 @@
 # for classes related to data objects
 
+import datetime
 import os
 import json
 
@@ -8,13 +9,13 @@ class Exercise():
     def __init__(self, name, equipment):
         self.name = name
         self.equipment = equipment 
-        self.data = self._load()
         rootdir = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
         datadir = os.path.join(rootdir, "data")
         filename = f"e_{self.name.replace(" ", "")}_{self.equipment.replace(" ","")}.json"
         if not os.path.exists(datadir):
-            os.mkdri(datadir)
+            os.mkdir(datadir)
         self.filepath = os.path.join(datadir, filename)
+        self.data = self._load()
 
     def __repr__(self):
         return f"{self.equipment} {self.name}"
@@ -44,6 +45,13 @@ class Exercise():
                 "history": dict()
             }
 
+    def _serialize(self):
+        return {
+            "name": self.name,
+            "equipment": self.equipment
+        }
+
+
     def _getMax(self, target, reps, weight, units):
         if target.lower() == "weight":
             try:
@@ -61,6 +69,22 @@ class Exercise():
             self.data["weightmax"][f"{reps}reps"] = weight
         if target.lower() == "reps":
             self.data["reps"][f"{weight}{units}"] = reps
+
+    def _getHistory(self, date, setnum=0):
+        try:
+            datestr = date.isoformat().replace("-","")
+            return self.data['history'][datestr][f"set{setnum}"]
+        except KeyError:
+            return None
+
+    def _setHistory(self, date, setnum, reps, weight, units):
+        datestr = date.isoformat().replace("-","")
+        self.data['history'][datestr] = dict()
+        self.data['history'][datestr][f"set{setnum}"] = {
+            "reps": reps,
+            "weight": weight,
+            "units": units
+            }
 
 class ExerciseSet():
 
@@ -87,6 +111,17 @@ class ExerciseSet():
 
     def _print(self):
         return f"{self.reps} @ {self.weight}{self.units}"
+
+    def _serialize(self):
+        serialdict = {
+            "exercise": self.exercise._serialize(),
+            "reps": self.reps,
+            "weight": self.weight,
+            "units": self.units,
+            "set_index": self.set_index,
+            "target": self.target
+        }
+        return serialdict
 
     def _getMax(self):
         #get recorded max for set number
@@ -125,6 +160,19 @@ class ExerciseBlock():
 
         return rstring
 
+    def _serialize(self):
+        # return class data as dictionary
+        serialdict = {
+            "exercise": self.exercise._serialize(),
+            "description": self.description,
+            "tags": self.tags,
+            "sets": []
+        }
+        for s in self.sets:
+            serialdict['sets'].append(s._serialize())
+        
+        return serialdict
+
     def addSet(self, reps, weight):
         new_index = len(self.sets)
         self.sets.append(
@@ -150,6 +198,13 @@ class WorkoutPlan():
         self.name = name
         self.tags = tags
         self.exercise_blocks = []
+
+        rootdir = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
+        datadir = os.path.join(rootdir, "data")
+        filename = f"wp_{self.name}.json"
+        if not os.path.exists(datadir):
+            os.mkdir(datadir)
+        self.filepath = os.path.join(datadir, filename)
 
     def __repr__(self):
         return f"[WorkoutPlan] {self.name}: {len(self.exercise_blocks)} exercises; {len(tags)} tags"
@@ -182,6 +237,25 @@ class WorkoutPlan():
         with open(outfile,'w') as f:
             f.write(extext)
             #write to file
+
+    def _serialize(self):
+        serialdict = {
+            "name": self.name,
+            "tags": self.tags,
+            "exercise_blocks": []
+        }
+        for block in self.exercise_blocks:
+            serialdict["exercise_blocks"].append(block._serialize())
+
+        return serialdict
+
+    def _save(self):
+        serialdict = self._serialize()
+        with open(self.filepath, 'w') as f:
+            json.dump(serialdict, f, indent=4)
+
+    def _load(self, filepath=None):
+        pass
             
         
         
