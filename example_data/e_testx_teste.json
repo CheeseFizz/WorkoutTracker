@@ -14,14 +14,14 @@
         },
         "history" : {
             "20250604" : {
-                "set1" : {"reps": 5, "weight": 360, "units": "lbs"},
-                "set2" : {"reps": 5, "weight": 360, "units": "lbs"},
-                "set3" : {"reps": 5, "weight": 360, "units": "lbs"}
+                "set1" : {"target": "reps", "reps": 5, "weight": 360, "units": "lbs"},
+                "set2" : {"target": "reps", "reps": 5, "weight": 360, "units": "lbs"},
+                "set3" : {"target": "reps", "reps": 5, "weight": 360, "units": "lbs"}
             },
             "20250611" : {
-                "set1" : {"reps": 5, "weight": 365, "units": "lbs"},
-                "set2" : {"reps": 5, "weight": 365, "units": "lbs"},
-                "set3" : {"reps": 5, "weight": 365, "units": "lbs"}
+                "set1" : {"target": "reps", "reps": 5, "weight": 365, "units": "lbs"},
+                "set2" : {"target": "reps", "reps": 5, "weight": 365, "units": "lbs"},
+                "set3" : {"target": "reps", "reps": 5, "weight": 365, "units": "lbs"}
             }
         }
             

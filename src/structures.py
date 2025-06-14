@@ -51,7 +51,6 @@ class Exercise():
             "equipment": self.equipment
         }
 
-
     def _getMax(self, target, reps, weight, units):
         if target.lower() == "weight":
             try:
@@ -60,7 +59,7 @@ class Exercise():
                 return None
         if target.lower() == "reps":
             try:
-                return self.data["reps"][f"{weight}{units}"]
+                return self.data["repmax"][f"{weight}{units}"]
             except KeyError:
                 return None
 
@@ -68,8 +67,23 @@ class Exercise():
         if target.lower() == "weight":
             self.data["weightmax"][f"{reps}reps"] = weight
         if target.lower() == "reps":
-            self.data["reps"][f"{weight}{units}"] = reps
+            self.data["repmax"][f"{weight}{units}"] = reps
 
+    def _gtMax(self, target, reps, weight, units):
+        current = self._getMax(target, reps, weight, units)
+        if not current:
+            return True
+
+        if target.lower() == "weight":
+            if weight > current:
+                return True
+            return False
+            
+        if target.lower() == "reps":
+            if reps > current:
+                return True
+            return False
+            
     def _getHistory(self, date, setnum=0):
         try:
             datestr = date.isoformat().replace("-","")
@@ -77,10 +91,11 @@ class Exercise():
         except KeyError:
             return None
 
-    def _setHistory(self, date, setnum, reps, weight, units):
+    def _setHistory(self, date, setnum, target, reps, weight, units):
         datestr = date.isoformat().replace("-","")
         self.data['history'][datestr] = dict()
         self.data['history'][datestr][f"set{setnum}"] = {
+            "target": target,
             "reps": reps,
             "weight": weight,
             "units": units
@@ -142,6 +157,7 @@ class ExerciseBlock():
         self.description = description
         self.tags = tags
         self.sets = []
+        self.complete_sets = []
 
     def __repr__(self):
         return f"[ExerciseBlock] {self.exercise}: {self.description[0:10]}... {len(self.sets)} sets; {len(self.tags)} tags"
@@ -192,7 +208,6 @@ class ExerciseBlock():
             i += 1
         return new_block
 
-
     def copy(self):
         new_block = ExerciseBlock(self.exercise, self.description, self.tags.copy())
         for s in self.sets:
@@ -204,9 +219,13 @@ class ExerciseBlock():
         self.sets.append(
             ExerciseSet(self.exercise, reps, weight, new_index)
         )
+        self.complete_sets.append(False)
 
     def removeSet(self, index):
         ignore = self.sets.pop(index)
+
+    def _completeSet(self, index):
+        self.complete_sets[index] = True
 
     def clearSetData(self):
         for s in self.sets:
@@ -239,7 +258,6 @@ class WorkoutPlan():
             os.mkdir(datadir)
         self.filepath = os.path.join(datadir, filename)
 
-
     def __repr__(self):
         return f"[WorkoutPlan] {self.name}: {len(self.exercise_blocks)} exercises; {len(tags)} tags"
 
@@ -254,7 +272,6 @@ class WorkoutPlan():
             return True
         return False
 
-
     def _print(self):
         # hline = "-"*os.get_terminal_size()[0]   doesn't work nice; try again later
         rstring = f"{self.name.title()}\n\n{self.description}\n\n"
@@ -263,7 +280,6 @@ class WorkoutPlan():
 
         return rstring
         
-
     def addExerciseBlock(self, exercise_block):
         self.exercise_blocks.append(
             #ExerciseBlock(exercise) maybe come back to this idea later
@@ -274,15 +290,27 @@ class WorkoutPlan():
         )
         self.actuals[-1].clearSetData()
 
-
     def removeExerciseBlock(self, index):
         ignore = self.exercise_blocks.pop(index)
-
 
     def _setActual(self, block_index, set_index, weight, reps):
         self.actuals[block_index].sets[set_index].weight = weight
         self.actuals[block_index].sets[set_index].reps = reps
 
+    def completeSet(self, block_index, set_index, weight, reps):
+        self._setActual(block_index, set_index, weight, reps)
+        self.exercise_blocks[block_index]._completeSet(set_index)
+
+    def saveResults(self):
+        today = datetime.date.today()
+        for eb in self.actuals:
+            for s in eb.sets:
+                if s.weight == 0 or s.reps == 0:
+                    continue
+                if s.exercise._gtMax(s.target, s.reps, s.weight, s.units):
+                    s.exercise._setMax(s.target, s.reps, s.weight, s.units)
+                s.exercise._setHistory(today, s.set_index, s.target, s.reps, s.weight, s.units)
+            s.exercise._save()
 
     def exportText(self, outfile):
         # some file safety stuff
@@ -296,7 +324,6 @@ class WorkoutPlan():
         with open(outfile,'w') as f:
             f.write(extext)
             #write to file
-
 
     def _serialize(self):
         serialdict = {
@@ -314,14 +341,12 @@ class WorkoutPlan():
 
         return serialdict
 
-
     def _save(self, filepath=None):
         serialdict = self._serialize()
         if not filepath:
             filepath = self.filepath
         with open(filepath, 'w') as f:
             json.dump(serialdict, f, indent=4)
-
 
     def _load(self, filepath=None):
         if not filepath:
