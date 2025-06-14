@@ -109,6 +109,9 @@ class ExerciseSet():
             return True
         return False
 
+    def copy(self):
+        return ExerciseSet(self.exercise, self.reps, self.weight, self.set_index, self.units, self.target)
+
     def _print(self):
         return f"{self.reps} @ {self.weight}{self.units}"
 
@@ -130,6 +133,7 @@ class ExerciseSet():
     def _setMax(self):
         #set recorded max for set number
         pass
+
 
 class ExerciseBlock():
     
@@ -165,13 +169,35 @@ class ExerciseBlock():
         serialdict = {
             "exercise": self.exercise._serialize(),
             "description": self.description,
-            "tags": self.tags,
+            "tags": sorted(list(self.tags)),
             "sets": []
         }
         for s in self.sets:
             serialdict['sets'].append(s._serialize())
         
         return serialdict
+
+    def _fromData(data):
+        new_block = ExerciseBlock(data["exercise"], data["description"], set(data["tags"]))
+        i = 0
+        for sdata in data["sets"]:
+            s = ExerciseSet(
+                Exercise(sdata["exercise"]["name"], sdata["exercise"]["equipment"]),
+                sdata["reps"],
+                sdata["weight"],
+                i,
+                sdata["units"],
+                sdata["target"]
+                )
+            i += 1
+        return new_block
+
+
+    def copy(self):
+        new_block = ExerciseBlock(self.exercise, self.description, self.tags.copy())
+        for s in self.sets:
+            new_block.sets.append(s.copy())
+        return new_block
 
     def addSet(self, reps, weight):
         new_index = len(self.sets)
@@ -181,6 +207,11 @@ class ExerciseBlock():
 
     def removeSet(self, index):
         ignore = self.sets.pop(index)
+
+    def clearSetData(self):
+        for s in self.sets:
+            s.weight = 0
+            s.reps = 0
 
     def setDescription(description):
         self.description = description
@@ -194,11 +225,12 @@ class ExerciseBlock():
 
 class WorkoutPlan():
 
-    def __init__(self, name, tags, description=""):
+    def __init__(self, name, tags=set(), description=""):
         self.name = name
         self.tags = tags
         self.description = description
         self.exercise_blocks = []
+        self.actuals = []
 
         rootdir = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
         datadir = os.path.join(rootdir, "data")
@@ -207,8 +239,21 @@ class WorkoutPlan():
             os.mkdir(datadir)
         self.filepath = os.path.join(datadir, filename)
 
+
     def __repr__(self):
         return f"[WorkoutPlan] {self.name}: {len(self.exercise_blocks)} exercises; {len(tags)} tags"
+
+    def __eq__(self, other):
+        if (
+            self.name == other.name and
+            self.tags == other.tags and
+            self.description == other.description and
+            self.exercise_blocks == other.exercise_blocks and
+            self.actuals == other.actuals
+            ):
+            return True
+        return False
+
 
     def _print(self):
         # hline = "-"*os.get_terminal_size()[0]   doesn't work nice; try again later
@@ -222,12 +267,22 @@ class WorkoutPlan():
     def addExerciseBlock(self, exercise_block):
         self.exercise_blocks.append(
             #ExerciseBlock(exercise) maybe come back to this idea later
-
             exercise_block
         )
+        self.actuals.append(
+            exercise_block.copy()
+        )
+        self.actuals[-1].clearSetData()
+
 
     def removeExerciseBlock(self, index):
         ignore = self.exercise_blocks.pop(index)
+
+
+    def _setActual(self, block_index, set_index, weight, reps):
+        self.actuals[block_index].sets[set_index].weight = weight
+        self.actuals[block_index].sets[set_index].reps = reps
+
 
     def exportText(self, outfile):
         # some file safety stuff
@@ -242,25 +297,45 @@ class WorkoutPlan():
             f.write(extext)
             #write to file
 
+
     def _serialize(self):
         serialdict = {
             "name": self.name,
             "description": self.description,
-            "tags": self.tags,
-            "exercise_blocks": []
+            "tags": sorted(list(self.tags)),
+            "exercise_blocks": [],
+            "actuals": []
         }
         for block in self.exercise_blocks:
             serialdict["exercise_blocks"].append(block._serialize())
+        for block in self.actuals:
+            serialdict["actuals"].append(block._serialize())
+
 
         return serialdict
 
-    def _save(self):
+
+    def _save(self, filepath=None):
         serialdict = self._serialize()
-        with open(self.filepath, 'w') as f:
+        if not filepath:
+            filepath = self.filepath
+        with open(filepath, 'w') as f:
             json.dump(serialdict, f, indent=4)
 
+
     def _load(self, filepath=None):
-        pass
+        if not filepath:
+            filepath = self.filepath
+        with open(filepath, 'r') as f:
+            data = json.load(f)
+        self.name = data["name"]  # this is typically redundant, but would support an import use case
+        self.description = data["description"]
+        self.tags = data["tags"]
+        for bdata in data["exercise_blocks"]:
+            self.exercise_blocks.append(ExerciseBlock._fromData(bdata))
+        for bdata in data["actuals"]:
+            self.actuals.append(ExerciseBlock._fromData(bdata))
+            
             
         
         
