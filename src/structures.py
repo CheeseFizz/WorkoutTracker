@@ -194,17 +194,22 @@ class ExerciseBlock():
         return serialdict
 
     def _fromData(data):
-        new_block = ExerciseBlock(data["exercise"], data["description"], set(data["tags"]))
+        new_block = ExerciseBlock(
+            Exercise(data["exercise"]["name"], data["exercise"]["equipment"]), 
+            data["description"], 
+            set(data["tags"])
+            )
         i = 0
         for sdata in data["sets"]:
             s = ExerciseSet(
-                Exercise(sdata["exercise"]["name"], sdata["exercise"]["equipment"]),
+                new_block.exercise,
                 sdata["reps"],
                 sdata["weight"],
                 i,
                 sdata["units"],
                 sdata["target"]
                 )
+            new_block.sets.append(s)
             i += 1
         return new_block
 
@@ -355,7 +360,7 @@ class WorkoutPlan():
             data = json.load(f)
         self.name = data["name"]  # this is typically redundant, but would support an import use case
         self.description = data["description"]
-        self.tags = data["tags"]
+        self.tags = set(data["tags"])
         for bdata in data["exercise_blocks"]:
             self.exercise_blocks.append(ExerciseBlock._fromData(bdata))
         for bdata in data["actuals"]:

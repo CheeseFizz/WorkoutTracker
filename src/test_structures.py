@@ -361,7 +361,7 @@ class TestWorkoutPlan(unittest.TestCase):
 
         plan._setActual(0, 0, 25, 9)
 
-        actual = plan.exercise_blocks[0].sets[0]
+        actual = plan.actuals[0].sets[0]
 
         expected = ExerciseSet(ex1, 9, 25, 0)
 
