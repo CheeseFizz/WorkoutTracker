@@ -164,6 +164,10 @@ class TestWorkoutPlan(unittest.TestCase):
         copyblock1.clearSetData()
         copyblock2.clearSetData()
 
+        plan.completeSet(0, 0, 25, 10)
+        copyblock1.sets[0].weight = 25
+        copyblock1.sets[0].reps = 10
+
         actual = plan._serialize()
 
         expected = {
@@ -342,7 +346,6 @@ class TestWorkoutPlan(unittest.TestCase):
 
         self.assertEqual(plan1, plan2)
 
-    
     def testSetActualWorkoutPlan(self):
         plan = WorkoutPlan("test plan", set(["test", "tag", "plan"]))
         ex1 = Exercise("Test", "Computer")
@@ -366,3 +369,62 @@ class TestWorkoutPlan(unittest.TestCase):
         expected = ExerciseSet(ex1, 9, 25, 0)
 
         self.assertEqual(expected, actual)
+
+    def testCompleteSetWorkoutPlan(self):
+        plan = WorkoutPlan("test plan", set(["test", "tag", "plan"]))
+        ex1 = Exercise("Test", "Computer")
+        block1 = ExerciseBlock(ex1, "A test block", set(["test","tag", "block"]))
+        block1.addSet(10, 25)
+        block1.addSet(10,35)
+
+        ex2 = Exercise("Test2", "Computer")
+        block2 = ExerciseBlock(ex2, "Second test block", set(["test", "block2"]))
+        block2.addSet(12, 20)
+        block2.addSet(12, 25)
+        block2.addSet(10, 30)
+
+        plan.addExerciseBlock(block1)
+        plan.addExerciseBlock(block2)
+
+        plan.completeSet(0, 0, 25, 10)
+        plan.completeSet(0, 1, 35, 9)
+        plan.completeSet(1, 0, 20, 14)
+        plan.completeSet(1, 1, 25, 12)
+
+        self.assertTrue(plan.exercise_blocks[0].complete_sets[0])
+        self.assertTrue(plan.exercise_blocks[0].complete_sets[1])
+        self.assertTrue(plan.exercise_blocks[1].complete_sets[0])
+        self.assertTrue(plan.exercise_blocks[1].complete_sets[1])
+        self.assertFalse(plan.exercise_blocks[1].complete_sets[2])
+
+    def testSaveResultsWorkoutPlan(self):
+        plan = WorkoutPlan("test plan3", set(["test", "tag", "plan"]))
+        ex1 = Exercise("Test", "Computer")
+        block1 = ExerciseBlock(ex1, "A test block", set(["test","tag", "block"]))
+        block1.addSet(10, 25)
+        block1.addSet(10, 35)
+
+        ex2 = Exercise("Test2", "Computer")
+        block2 = ExerciseBlock(ex2, "Second test block", set(["test", "block2"]))
+        block2.addSet(12, 20)
+        block2.addSet(12, 25)
+        block2.addSet(10, 30)
+
+        plan.addExerciseBlock(block1)
+        plan.addExerciseBlock(block2)
+
+        plan.completeSet(0, 0, 25, 10)
+        plan.completeSet(0, 1, 35, 9)
+        plan.completeSet(1, 0, 20, 14)
+        plan.completeSet(1, 1, 25, 12)
+
+        plan.saveResults()
+
+        plan_exists = os.path.exists(plan.filepath)
+        ex1_exists = os.path.exists(ex1.filepath)
+        ex2_exists = os.path.exists(ex2.filepath)
+        
+        self.assertTrue(plan_exists)
+        self.assertTrue(ex1_exists)
+        self.assertTrue(ex2_exists)
+

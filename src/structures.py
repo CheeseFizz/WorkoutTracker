@@ -15,7 +15,7 @@ class Exercise():
         if not os.path.exists(datadir):
             os.mkdir(datadir)
         self.filepath = os.path.join(datadir, filename)
-        self.data = self._load()
+        self._load() # sets self.data
 
     def __repr__(self):
         return f"{self.equipment} {self.name}"
@@ -93,7 +93,8 @@ class Exercise():
 
     def _setHistory(self, date, setnum, target, reps, weight, units):
         datestr = date.isoformat().replace("-","")
-        self.data['history'][datestr] = dict()
+        if not self.data['history'][datestr]:
+            self.data['history'][datestr] = dict()
         self.data['history'][datestr][f"set{setnum}"] = {
             "target": target,
             "reps": reps,
@@ -308,14 +309,20 @@ class WorkoutPlan():
 
     def saveResults(self):
         today = datetime.date.today()
+        i = 0
         for eb in self.actuals:
+            n = 0
             for s in eb.sets:
-                if s.weight == 0 or s.reps == 0:
+                if not (self.exercise_blocks[i].complete_sets[n]):
+                    n += 1
                     continue
                 if s.exercise._gtMax(s.target, s.reps, s.weight, s.units):
                     s.exercise._setMax(s.target, s.reps, s.weight, s.units)
                 s.exercise._setHistory(today, s.set_index, s.target, s.reps, s.weight, s.units)
+                n += 1
             s.exercise._save()
+            i += 1
+        self._save(self.filepath)
 
     def exportText(self, outfile):
         # some file safety stuff
