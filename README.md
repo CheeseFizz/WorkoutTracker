@@ -13,7 +13,7 @@ Being built in Python for simplicity; not because it's the best choice for this 
   - [x] Save text representation to file
 - [x] Record actual workout results (i.e. exercise A, set x, y reps at z weight)
 - [x] Record best weight and rep achievements
-- [ ] Recall most recent actuals when planning new workout with same exercise
+- [x] Optionally recall most recent actuals when planning new workout with same exercise
 
 #### Stretch:
 - [ ] Prettier, printable export of workout plan

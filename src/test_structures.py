@@ -333,6 +333,8 @@ class TestWorkoutPlan(unittest.TestCase):
 
         plan1.addExerciseBlock(block1)
         plan1.addExerciseBlock(block2)
+        plan1.completeSet(0, 0, 25, 11)
+        plan1.completeSet(0, 0, 35, 10)
 
         plan1._save()
 
@@ -345,6 +347,19 @@ class TestWorkoutPlan(unittest.TestCase):
         self.assertEqual(plan1.actuals, plan2.actuals)
 
         self.assertEqual(plan1, plan2)
+
+        # test loading with actuals as new set targets
+        plan3 = WorkoutPlan("test plan2")
+        plan3._load(from_actuals=True)
+
+        expected = ExerciseSet(ex1, 0, 0, 0)
+        actual = plan3.actuals[0].sets[0]
+        self.assertEqual(expected, actual)
+
+        expected = plan1.actuals[0].sets[0]
+        actual = plan3.exercise_blocks[0].sets[0]
+        self.assertEqual(expected, actual)
+
 
     def testSetActualWorkoutPlan(self):
         plan = WorkoutPlan("test plan", set(["test", "tag", "plan"]))

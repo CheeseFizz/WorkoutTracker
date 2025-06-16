@@ -93,7 +93,7 @@ class Exercise():
 
     def _setHistory(self, date, setnum, target, reps, weight, units):
         datestr = date.isoformat().replace("-","")
-        if not self.data['history'][datestr]:
+        if datestr not in self.data['history'].keys():
             self.data['history'][datestr] = dict()
         self.data['history'][datestr][f"set{setnum}"] = {
             "target": target,
@@ -360,7 +360,7 @@ class WorkoutPlan():
         with open(filepath, 'w') as f:
             json.dump(serialdict, f, indent=4)
 
-    def _load(self, filepath=None):
+    def _load(self, from_actuals=False, filepath=None):
         if not filepath:
             filepath = self.filepath
         with open(filepath, 'r') as f:
@@ -368,10 +368,17 @@ class WorkoutPlan():
         self.name = data["name"]  # this is typically redundant, but would support an import use case
         self.description = data["description"]
         self.tags = set(data["tags"])
-        for bdata in data["exercise_blocks"]:
-            self.exercise_blocks.append(ExerciseBlock._fromData(bdata))
-        for bdata in data["actuals"]:
-            self.actuals.append(ExerciseBlock._fromData(bdata))
+
+        if from_actuals:
+            for bdata in data["actuals"]:
+                self.exercise_blocks.append(ExerciseBlock._fromData(bdata))
+                self.actuals.append(ExerciseBlock._fromData(bdata))
+                self.actuals[-1].clearSetData()
+        else:
+            for bdata in data["exercise_blocks"]:
+                self.exercise_blocks.append(ExerciseBlock._fromData(bdata))
+            for bdata in data["actuals"]:
+                self.actuals.append(ExerciseBlock._fromData(bdata))
             
             
         
