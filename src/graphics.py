@@ -1,112 +1,240 @@
 # for GUI object classes/wrappers
+# Working on this in wxGlade
 
 import wx
 
-# literally just the Hello World 2 example from wxPython's site for now
-class AppFrame(wx.Frame):
-    
-    def __init__(self, *args, **kwargs):
-        super(AppFrame, self).__init__(*args, **kwargs)
+# begin wxGlade: dependencies
+# end wxGlade
 
-        # create a panel in the frame
-        pnl = wx.Panel(self)
-
-        # put some text with a larger bold font on it
-        st = wx.StaticText(pnl, label="Hello World!")
-        font = st.GetFont()
-        font.PointSize += 10
-        font = font.Bold()
-        st.SetFont(font)
-
-        # and create a sizer to manage the layout of child widgets
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(st, wx.SizerFlags().Border(wx.TOP|wx.LEFT, 25))
-        pnl.SetSizer(sizer)
-
-        # create a menu bar
-        self.makeMenuBar()
-
-        # and a status bar
-        self.CreateStatusBar()
-        self.SetStatusText("Welcome to wxPython!")
-
-    def makeMenuBar(self):
-        """
-        A menu bar is composed of menus, which are composed of menu items.
-        This method builds a set of menus and binds handlers to be called
-        when the menu item is selected.
-        """
-
-        # Make a file menu with Hello and Exit items
-        fileMenu = wx.Menu()
-        # The "\t..." syntax defines an accelerator key that also triggers
-        # the same event
-        helloItem = fileMenu.Append(-1, "&Hello...\tCtrl-H",
-                "Help string shown in status bar for this menu item")
-        fileMenu.AppendSeparator()
-        # When using a stock ID we don't need to specify the menu item's
-        # label
-        exitItem = fileMenu.Append(wx.ID_EXIT)
-        preferencesItem = fileMenu.Append(wx.ID_PREFERENCES)
+# begin wxGlade: extracode
+# end wxGlade
 
 
-        # Now a help menu for the about item
-        helpMenu = wx.Menu()
-        aboutItem = helpMenu.Append(wx.ID_ABOUT)
-        
+class MyFrame(wx.Frame):
+    def __init__(self, *args, **kwds):
+        # begin wxGlade: MyFrame.__init__
+        kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_FRAME_STYLE
+        wx.Frame.__init__(self, *args, **kwds)
+        self.SetSize((400, 300))
+        self.SetTitle("CheezeFizz WT")
 
+        # Menu Bar
+        self.frame_menubar = wx.MenuBar()
+        self.FileMenu = wx.Menu()
+        self.frame_menubar.Append(self.FileMenu, "&File")
+        self.SetMenuBar(self.frame_menubar)
+        # Menu Bar end
 
-        # Make the menu bar and add the two menus to it. The '&' defines
-        # that the next letter is the "mnemonic" for the menu item. On the
-        # platforms that support it those letters are underlined and can be
-        # triggered from the keyboard.
-        menuBar = wx.MenuBar()
-        menuBar.Append(fileMenu, "&File")
-        menuBar.Append(helpMenu, "&Help")
+        self.panel_1 = wx.Panel(self, wx.ID_ANY)
 
-        # Give the menu bar to the frame
-        self.SetMenuBar(menuBar)
+        sizer_1 = wx.GridSizer(2, 1, 2, 0)
 
-        # Finally, associate a handler function with the EVT_MENU event for
-        # each of the menu items. That means that when that menu item is
-        # activated then the associated handler function will be called.
-        self.Bind(wx.EVT_MENU, self.OnHello, helloItem)
-        self.Bind(wx.EVT_MENU, self.OnExit,  exitItem)
-        self.Bind(wx.EVT_MENU, self.OnAbout, aboutItem)
-        self.Bind(wx.EVT_MENU, self.OnPreferences, preferencesItem)
+        label_1 = wx.StaticText(self.panel_1, wx.ID_ANY, "CheeseFizz Workout Tracker")
+        sizer_1.Add(label_1, 0, wx.ALIGN_CENTER_HORIZONTAL, 0)
 
+        grid_sizer_1 = wx.GridSizer(1, 3, 0, 0)
+        sizer_1.Add(grid_sizer_1, 1, wx.EXPAND, 0)
 
-    def OnExit(self, event):
-        """Close the frame, terminating the application."""
-        self.Close(True)
+        self.NewWT = wx.Button(self.panel_1, wx.ID_ANY, "New Workout")
+        grid_sizer_1.Add(self.NewWT, 0, wx.ALIGN_CENTER, 0)
 
+        self.LoadWT = wx.Button(self.panel_1, wx.ID_ANY, "Load Workout")
+        grid_sizer_1.Add(self.LoadWT, 0, wx.ALIGN_CENTER, 0)
 
-    def OnHello(self, event):
-        """Say hello to the user."""
-        wx.MessageBox("Hello again from wxPython")
+        self.ImportWT = wx.Button(self.panel_1, wx.ID_ANY, "Import Workout")
+        grid_sizer_1.Add(self.ImportWT, 0, wx.ALIGN_CENTER, 0)
 
+        self.panel_1.SetSizer(sizer_1)
 
-    def OnAbout(self, event):
-        """Display an About Dialog"""
-        wx.MessageBox("This is a wxPython Hello World sample",
-                      "About Hello World 2",
-                      wx.OK|wx.ICON_INFORMATION)
-                    
-    def OnPreferences(self, event):
-        prefmenu = PreferencesDialog(self, "Preferences")
-        prefmenu.Show()
-        # wx.MessageBox("Preferences Menu",
-        #               "WIP",
-        #               wx.OK|wx.ICON_INFORMATION)
+        self.Layout()
 
+        self.NewWT.Bind(wx.EVT_BUTTON, self.onClick)
+        self.LoadWT.Bind(wx.EVT_BUTTON, self.onClick)
+        self.ImportWT.Bind(wx.EVT_BUTTON, self.onClick)
+        self.Bind(wx.EVT_CLOSE, self.onExit)
+        # end wxGlade
 
+    def onMenu_File(self, event):  # wxGlade: MyFrame.<event_handler>
+        print("Event handler 'onMenu_File' not implemented!")
+        event.Skip()
 
-class PreferencesDialog(wx.Dialog):
+    def onClick(self, event):  # wxGlade: MyFrame.<event_handler>
+        print("Event handler 'onClick' not implemented!")
+        event.Skip()
 
-    def __init__(self, parent, title):
-        super(PreferencesDialog, self).__init__(parent, title=title)
-        panel = wx.Panel(self)
-        sizer = wx.GridSizer(3, 3, 5, 5)
-        panel.SetSizer(sizer)
-        self.btn = wx.Button(panel, wx.ID_OK, label = "ok")
-        sizer.Add(self.btn, 0, wx.ALIGN_CENTER)
+    def onExit(self, event):  # wxGlade: MyFrame.<event_handler>
+        print("Event handler 'onExit' not implemented!")
+        event.Skip()
+
+# end of class MyFrame
+
+class MyDialog(wx.Dialog):
+    def __init__(self, *args, **kwds):
+        # begin wxGlade: MyDialog.__init__
+        kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_DIALOG_STYLE
+        wx.Dialog.__init__(self, *args, **kwds)
+        self.SetTitle("New Workout")
+
+        sizer_1 = wx.BoxSizer(wx.VERTICAL)
+
+        self.window_1 = wx.SplitterWindow(self, wx.ID_ANY)
+        self.window_1.SetMinimumPaneSize(20)
+        sizer_1.Add(self.window_1, 1, wx.EXPAND, 0)
+
+        self.window_1_pane_1 = wx.Panel(self.window_1, wx.ID_ANY)
+
+        sizer_3 = wx.BoxSizer(wx.HORIZONTAL)
+
+        self.tree_ctrl_1 = wx.TreeCtrl(self.window_1_pane_1, wx.ID_ANY, style=wx.BORDER_SUNKEN | wx.TR_HAS_BUTTONS | wx.TR_NO_BUTTONS | wx.TR_SINGLE)
+        sizer_3.Add(self.tree_ctrl_1, 1, wx.EXPAND, 0)
+
+        self.notebook_1 = wx.Notebook(self.window_1, wx.ID_ANY)
+
+        self.notebook_1_pane_1 = wx.Panel(self.notebook_1, wx.ID_ANY)
+        self.notebook_1.AddPage(self.notebook_1_pane_1, "notebook_1_pane_1")
+
+        sizer_4 = wx.BoxSizer(wx.VERTICAL)
+
+        sizer_8 = wx.BoxSizer(wx.HORIZONTAL)
+        sizer_4.Add(sizer_8, 1, wx.EXPAND, 0)
+
+        label_1 = wx.StaticText(self.notebook_1_pane_1, wx.ID_ANY, "Name", style=wx.ALIGN_CENTER_HORIZONTAL)
+        sizer_8.Add(label_1, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 20)
+
+        self.text_ctrl_1 = wx.TextCtrl(self.notebook_1_pane_1, wx.ID_ANY, "")
+        sizer_8.Add(self.text_ctrl_1, 0, wx.ALIGN_CENTER_VERTICAL, 0)
+
+        sizer_9 = wx.BoxSizer(wx.HORIZONTAL)
+        sizer_4.Add(sizer_9, 1, wx.EXPAND, 0)
+
+        label_2 = wx.StaticText(self.notebook_1_pane_1, wx.ID_ANY, "Tags (separate by semicolon)", style=wx.ALIGN_CENTER_HORIZONTAL)
+        sizer_9.Add(label_2, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 20)
+
+        self.text_ctrl_2 = wx.TextCtrl(self.notebook_1_pane_1, wx.ID_ANY, "")
+        sizer_9.Add(self.text_ctrl_2, 0, wx.ALIGN_CENTER_VERTICAL, 0)
+
+        sizer_10 = wx.BoxSizer(wx.HORIZONTAL)
+        sizer_4.Add(sizer_10, 1, wx.EXPAND, 0)
+
+        self.button_1 = wx.Button(self.notebook_1_pane_1, wx.ID_ANY, "Add Exercise")
+        sizer_10.Add(self.button_1, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+
+        self.button_2 = wx.Button(self.notebook_1_pane_1, wx.ID_ANY, "Edit Exercise")
+        sizer_10.Add(self.button_2, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+
+        self.button_3 = wx.Button(self.notebook_1_pane_1, wx.ID_ANY, "Remove Exercise")
+        sizer_10.Add(self.button_3, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+
+        self.notebook_1_pane_2 = wx.Panel(self.notebook_1, wx.ID_ANY)
+        self.notebook_1.AddPage(self.notebook_1_pane_2, "notebook_1_pane_2")
+
+        sizer_5 = wx.BoxSizer(wx.VERTICAL)
+
+        sizer_11 = wx.BoxSizer(wx.HORIZONTAL)
+        sizer_5.Add(sizer_11, 1, wx.EXPAND, 0)
+
+        label_3 = wx.StaticText(self.notebook_1_pane_2, wx.ID_ANY, "Exercise", style=wx.ALIGN_CENTER_HORIZONTAL)
+        sizer_11.Add(label_3, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 20)
+
+        self.combo_box_1 = wx.ComboBox(self.notebook_1_pane_2, wx.ID_ANY, choices=[], style=wx.CB_DROPDOWN | wx.CB_SORT)
+        sizer_11.Add(self.combo_box_1, 0, wx.ALIGN_CENTER_VERTICAL, 0)
+
+        sizer_12 = wx.BoxSizer(wx.HORIZONTAL)
+        sizer_5.Add(sizer_12, 1, wx.EXPAND, 0)
+
+        label_4 = wx.StaticText(self.notebook_1_pane_2, wx.ID_ANY, "Tags (separate by semicolon)", style=wx.ALIGN_CENTER_HORIZONTAL)
+        sizer_12.Add(label_4, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 20)
+
+        self.text_ctrl_4 = wx.TextCtrl(self.notebook_1_pane_2, wx.ID_ANY, "")
+        sizer_12.Add(self.text_ctrl_4, 0, wx.ALIGN_CENTER_VERTICAL, 0)
+
+        sizer_5.Add((0, 0), 0, 0, 0)
+
+        sizer_13 = wx.BoxSizer(wx.HORIZONTAL)
+        sizer_5.Add(sizer_13, 1, wx.EXPAND, 0)
+
+        self.button_4 = wx.Button(self.notebook_1_pane_2, wx.ID_ANY, "Add to Workout")
+        sizer_13.Add(self.button_4, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+
+        self.button_5 = wx.Button(self.notebook_1_pane_2, wx.ID_ANY, "Add Set")
+        sizer_13.Add(self.button_5, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+
+        self.button_6 = wx.Button(self.notebook_1_pane_2, wx.ID_ANY, "Remove Set")
+        sizer_13.Add(self.button_6, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+
+        self.notebook_1_pane_3 = wx.Panel(self.notebook_1, wx.ID_ANY)
+        self.notebook_1.AddPage(self.notebook_1_pane_3, "notebook_1_pane_3")
+
+        sizer_6 = wx.BoxSizer(wx.VERTICAL)
+
+        sizer_6.Add((0, 0), 0, 0, 0)
+
+        self.notebook_1_pane_4 = wx.Panel(self.notebook_1, wx.ID_ANY)
+        self.notebook_1.AddPage(self.notebook_1_pane_4, "notebook_1_pane_4")
+
+        sizer_7 = wx.BoxSizer(wx.VERTICAL)
+
+        sizer_7.Add((0, 0), 0, 0, 0)
+
+        sizer_2 = wx.StdDialogButtonSizer()
+        sizer_1.Add(sizer_2, 0, wx.ALIGN_RIGHT | wx.ALL, 4)
+
+        self.button_7 = wx.Button(self, wx.ID_ANY, "Apply")
+        sizer_2.Add(self.button_7, 0, 0, 0)
+
+        self.button_OK = wx.Button(self, wx.ID_OK, "")
+        self.button_OK.SetDefault()
+        sizer_2.AddButton(self.button_OK)
+
+        self.button_CANCEL = wx.Button(self, wx.ID_CANCEL, "")
+        sizer_2.AddButton(self.button_CANCEL)
+
+        sizer_2.Realize()
+
+        self.notebook_1_pane_4.SetSizer(sizer_7)
+
+        self.notebook_1_pane_3.SetSizer(sizer_6)
+
+        self.notebook_1_pane_2.SetSizer(sizer_5)
+
+        self.notebook_1_pane_1.SetSizer(sizer_4)
+
+        self.window_1_pane_1.SetSizer(sizer_3)
+
+        self.window_1.SplitVertically(self.window_1_pane_1, self.notebook_1)
+
+        self.SetSizer(sizer_1)
+        sizer_1.Fit(self)
+
+        self.SetAffirmativeId(self.button_OK.GetId())
+        self.SetEscapeId(self.button_CANCEL.GetId())
+
+        self.Layout()
+
+        self.text_ctrl_1.Bind(wx.EVT_TEXT_ENTER, self.onEnter)
+        self.text_ctrl_2.Bind(wx.EVT_TEXT_ENTER, self.onEnter)
+        self.button_1.Bind(wx.EVT_BUTTON, self.onClick)
+        self.button_2.Bind(wx.EVT_BUTTON, self.onClick)
+        self.button_3.Bind(wx.EVT_BUTTON, self.onClick)
+        self.text_ctrl_4.Bind(wx.EVT_TEXT_ENTER, self.onEnter)
+        self.button_4.Bind(wx.EVT_BUTTON, self.onClick)
+        self.button_5.Bind(wx.EVT_BUTTON, self.onClick)
+        self.button_6.Bind(wx.EVT_BUTTON, self.onClick)
+        # end wxGlade
+
+    def onEnter(self, event):  # wxGlade: MyDialog.<event_handler>
+        print("Event handler 'onEnter' not implemented!")
+        event.Skip()
+
+    def onClick(self, event):  # wxGlade: MyDialog.<event_handler>
+        print("Event handler 'onClick' not implemented!")
+        event.Skip()
+
+# end of class MyDialog
+
+class WTApp(wx.App):
+    def OnInit(self):
+        self.frame = MyFrame(None, wx.ID_ANY, "")
+        self.SetTopWindow(self.frame)
+        self.frame.Show()
+        return True
